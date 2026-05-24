@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "記事シェアアプリ",
+  "version": "1.0",
+  "description": "記事をClaude AIで要約してX・Facebook・Threadsにシェア",
+  "permissions": ["activeTab", "scripting", "storage", "sidePanel", "tabs"],
+  "host_permissions": ["https://api.anthropic.com/*"],
+  "action": {
+    "default_title": "記事シェアアプリを開く"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

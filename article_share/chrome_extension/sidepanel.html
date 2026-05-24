@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>記事シェアアプリ</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: #fff; color: #222; }
+
+    header {
+      background: #1a1a2e; color: #fff; padding: 12px 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 10;
+    }
+    header b { font-size: 15px; }
+    #close-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; padding: 0; line-height: 1; }
+
+    .body { padding: 14px; }
+
+    .field-label { font-weight: 600; display: block; margin-bottom: 4px; font-size: 13px; }
+    input[type=password] {
+      width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 13px; font-family: inherit;
+    }
+    .save-label {
+      display: flex; align-items: center; gap: 4px; font-size: 12px;
+      color: #555; margin-top: 5px; cursor: pointer;
+    }
+
+    #url-display {
+      font-size: 11px; color: #888; margin: 10px 0 4px;
+      word-break: break-all; line-height: 1.4;
+    }
+
+    #generate-btn {
+      width: 100%; padding: 10px; background: #1a1a2e; color: #fff;
+      border: none; border-radius: 6px; cursor: pointer; font-size: 15px;
+      font-weight: 700; margin-top: 8px;
+    }
+    #generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #status { margin-top: 10px; }
+    #results { margin-top: 4px; }
+
+    hr.divider { margin: 14px 0; border: none; border-top: 1px solid #eee; }
+
+    .card { margin-bottom: 14px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+    .card-head { background: #f5f5f5; padding: 8px 12px; font-weight: 600; font-size: 13px; }
+    .card-body { padding: 10px; }
+    .ta {
+      width: 100%; height: 105px; padding: 6px; border: 1px solid #ddd; border-radius: 6px;
+      font-size: 12px; resize: vertical; line-height: 1.5; font-family: inherit;
+    }
+    .count { font-size: 11px; margin: 5px 0 7px; }
+    .btn-row { display: flex; gap: 6px; }
+    .copy-btn {
+      flex: 1; padding: 7px; background: #f0f2f6; border: 1px solid #ccc;
+      border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    .share-btn {
+      flex: 1; padding: 7px; background: #1a1a2e; color: #fff;
+      border-radius: 4px; text-align: center; text-decoration: none;
+      font-size: 12px; display: flex; align-items: center; justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <b>📢 記事シェアアプリ</b>
+    <button id="close-btn" title="閉じる">✕</button>
+  </header>
+
+  <div class="body">
+    <div style="margin-bottom:4px">
+      <label class="field-label">Anthropic API キー</label>
+      <input type="password" id="api-key" placeholder="sk-ant-...">
+      <label class="save-label">
+        <input type="checkbox" id="save-key"> APIキーを保存する
+      </label>
+    </div>
+
+    <div id="url-display">ページを読み込み中...</div>
+
+    <button id="generate-btn">✨ 要約を生成</button>
+
+    <div id="status"></div>
+    <div id="results"></div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

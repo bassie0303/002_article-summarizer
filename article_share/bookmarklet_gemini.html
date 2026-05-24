@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>記事シェアアプリ — ブックマークレット版 (Gemini)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6fb; color: #222; }
+    header { background: #1a73e8; color: #fff; padding: 24px 40px; }
+    header h1 { font-size: 22px; font-weight: 700; }
+    header p { font-size: 14px; opacity: .75; margin-top: 4px; }
+    main { max-width: 700px; margin: 40px auto; padding: 0 20px 60px; }
+    section { background: #fff; border-radius: 12px; padding: 28px; margin-bottom: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    h2 { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #1a73e8; }
+    #bm-link {
+      display: inline-block; padding: 14px 28px; background: #1a73e8; color: #fff !important;
+      border-radius: 10px; text-decoration: none; font-size: 18px; font-weight: 700;
+      cursor: grab; user-select: none; border: 3px dashed transparent; transition: border-color .15s;
+    }
+    #bm-link:hover { border-color: #8ab4f8; }
+    .hint { font-size: 13px; color: #888; margin-top: 10px; line-height: 1.6; }
+    ol li { margin-bottom: 10px; font-size: 14px; line-height: 1.6; padding-left: 4px; }
+    ol { padding-left: 20px; }
+    .note { background: #e8f0fe; border-left: 4px solid #1a73e8; padding: 12px 16px; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; margin-top: 16px; }
+    code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: monospace; }
+    pre { background: #1e1e2e; color: #cdd6f4; padding: 16px; border-radius: 8px; font-size: 11px; overflow-x: auto; margin-top: 10px; white-space: pre-wrap; word-break: break-all; }
+    details { margin-top: 16px; }
+    summary { cursor: pointer; font-size: 13px; color: #1a73e8; font-weight: 600; }
+    button.act { padding: 8px 16px; background: #1a73e8; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; margin-top: 10px; }
+    #bm-len { font-size: 12px; margin-top: 8px; color: #16a34a; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🤖 記事シェアアプリ — ブックマークレット版 (Gemini)</h1>
+    <p>Google Gemini を使ったSNSシェアツール — ブラウザ拡張不要</p>
+  </header>
+  <main>
+    <section>
+      <h2>① ブックマークレットをインストール</h2>
+      <p style="font-size:14px;margin-bottom:16px;">下のボタンを <strong>ブックマークバーにドラッグ</strong> してください。</p>
+      <a id="bm-link" href="#">🤖 記事シェア(Gemini)</a>
+      <div id="bm-len"></div>
+      <p class="hint">
+        ブックマークバーが表示されていない場合：Chrome <code>⌘+Shift+B</code> / Firefox <code>表示 → ツールバー → ブックマークツールバー</code>
+      </p>
+      <details open>
+        <summary>ドラッグがうまくいかない場合 → 手動インストール（確実）</summary>
+        <p style="font-size:13px;color:#555;margin-top:10px;">
+          <strong>① 下の「コードをコピー」を押す</strong><br>
+          <strong>② ブックマークバーを右クリック →「ページを追加…」</strong><br>
+          <strong>③ 名前: <code>🤖 記事シェア(Gemini)</code>　URL欄: コピーしたコードを貼り付け → 保存</strong>
+        </p>
+        <pre id="bm-code">生成中...</pre>
+        <button class="act" onclick="copyCode()">📋 コードをコピー</button>
+      </details>
+      <details style="margin-top:8px;">
+        <summary>このページで動作テスト</summary>
+        <p style="font-size:13px;color:#555;margin:10px 0;">インストール前に動作確認できます。</p>
+        <button class="act" onclick="bm()">▶ ここで試す</button>
+      </details>
+    </section>
+    <section>
+      <h2>② 使い方</h2>
+      <ol>
+        <li>要約したい記事をブラウザで開く</li>
+        <li>ブックマークバーの「🤖 記事シェア(Gemini)」をクリック</li>
+        <li>初回のみ Google AI Studio の API キーを入力（次回から自動入力）</li>
+        <li>「✨ 要約を生成」をクリック</li>
+        <li>X・Facebook・Threads 向けテキストをコピーまたは直接シェア</li>
+      </ol>
+      <div class="note">💡 もう一度クリックするとパネルが閉じます。</div>
+    </section>
+    <section>
+      <h2>🔑 API キーの取得</h2>
+      <p style="font-size:14px;line-height:1.7;">
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#1a73e8;">Google AI Studio</a> から無料で取得できます。キーは <code>AIzaSy...</code> から始まります。<br>
+        キーはブラウザの <code>localStorage</code> にのみ保存され、第三者サーバーには送信されません。
+      </p>
+    </section>
+  </main>
+
+  <script>
+    function bm(){var Q='_sg',ex=document.getElementById(Q);if(ex){ex.remove();return;}var u=location.href,ti=document.title,sk=localStorage.getItem(Q)||'';var p=document.createElement('div');p.id=Q;p.style.cssText='position:fixed;top:0;right:0;width:440px;max-width:100vw;height:100vh;background:#fff;box-shadow:-3px 0 16px rgba(0,0,0,.2);z-index:2147483647;overflow-y:auto;font-family:sans-serif;font-size:13px';p.innerHTML='<div style="background:#1a73e8;color:#fff;padding:10px 14px;display:flex;justify-content:space-between;align-items:center"><b>🤖 記事シェア (Gemini)</b><button id="_gx" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;padding:0">✕</button></div><div style="padding:12px"><input id="_gk" type="password" value="'+sk.replace(/"/g,'&#34;')+'" placeholder="Google AI Studio APIキー(AIzaSy...)" style="width:100%;padding:7px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;margin-bottom:4px"><select id="_gm" style="width:100%;padding:6px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-size:12px"><option value="">── APIキー入力後に自動取得 ──</option></select><button id="_gml" style="width:100%;margin-top:3px;padding:5px;border:1px solid #1a73e8;border-radius:4px;background:#e8f0fe;color:#1a73e8;cursor:pointer;font-size:11px">🔄 利用可能なモデルを取得</button><label style="font-size:11px;display:flex;align-items:center;gap:3px;margin-top:3px;cursor:pointer"><input type="checkbox" id="_gv"'+(sk?' checked':'')+'>保存する</label><p style="font-size:10px;color:#999;margin:5px 0;word-break:break-all">'+u.slice(0,80)+(u.length>80?'...':'')+'</p><button id="_gg" style="width:100%;padding:8px;background:#1a73e8;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:14px;font-weight:700">✨ 要約を生成</button><div id="_gs" style="margin-top:6px"></div><div id="_gr"></div></div>';document.body.appendChild(p);document.getElementById('_gx').onclick=function(){p.remove();};async function loadModels(){var k=document.getElementById('_gk').value.trim();if(!k)return;var btn=document.getElementById('_gml');btn.textContent='取得中...';btn.disabled=true;try{var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+k);var d=await r.json();if(d.error)throw new Error(d.error.message);var sel=document.getElementById('_gm');sel.innerHTML='';d.models.filter(function(m){return m.supportedGenerationMethods&&m.supportedGenerationMethods.indexOf('generateContent')>=0;}).forEach(function(m){var n=m.name.replace('models/','');var o=document.createElement('option');o.value=n;o.textContent=n+(m.description?' — '+m.description.slice(0,40):'');sel.appendChild(o);});btn.textContent='✅ 取得完了';}catch(e){btn.textContent='❌ '+e.message.slice(0,40);}btn.disabled=false;}document.getElementById('_gml').onclick=loadModels;if(sk)loadModels();function st(c,m){document.getElementById('_gs').innerHTML='<p style="margin:0;padding:7px;background:'+c+';border-radius:4px;font-size:12px">'+m+'</p>';}document.getElementById('_gg').onclick=async function(){var k=document.getElementById('_gk').value.trim();if(!k)return st('#fee','⚠️ APIキーを入力してください');document.getElementById('_gv').checked?localStorage.setItem(Q,k):localStorage.removeItem(Q);var b=this;b.disabled=true;st('#eef','🔍 解析中...');var tx='';['article','main','.post-content','.entry-content'].some(function(s){var e=document.querySelector(s);if(e&&e.innerText.length>100){tx=e.innerText.slice(0,3500);return true;}});if(!tx)tx=document.body.innerText.slice(0,3500);var xAv=Math.max(20,267-u.length),thAv=Math.max(20,487-u.length);st('#eef','🤖 Geminiが生成中...');try{var m=document.getElementById('_gm').value,r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+k,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({system_instruction:{parts:[{text:'あなたはSNSマーケティングの専門家です。必ずJSON形式のみで回答し、マークダウン・説明文・コードブロックは一切出力しないでください。X:'+xAv+'字以内+ハッシュタグ2-3個（文字数が足りない場合はタイトルのみや一言でも可）、Facebook:詳しく絵文字可、Threads:'+thAv+'字以内カジュアル（文字数が足りない場合はタイトルのみや一言でも可）。'}]},contents:[{role:'user',parts:[{text:'以下の記事を各SNS向けに要約し、次のJSONフォーマットのみで返してください。JSON以外は絶対に出力しないでください。\n{"x":"X用テキスト","facebook":"Facebook用テキスト","threads":"Threads用テキスト"}\n\nタイトル:'+ti+'\n本文:\n'+tx}]}],generationConfig:{maxOutputTokens:1500,responseMimeType:'application/json'}})});if(!r.ok){var e=await r.json();throw new Error((e.error&&e.error.message)||'HTTP '+r.status);}var d=await r.json();if(!d.candidates||!d.candidates[0])throw new Error('レスポンスが空です（コンテンツポリシーによりブロックされた可能性があります）');var raw=d.candidates[0].content.parts[0].text,j0=raw.indexOf('{'),j1=raw.lastIndexOf('}');if(j0<0||j1<0)throw new Error('JSONが見つかりません。Gemini応答:「'+raw.slice(0,120)+'」');var fixed=raw.slice(j0,j1+1).replace(/("(?:[^"\\]|\\.|[\n\r])*")/g,function(m){return m.replace(/\n/g,'\\n').replace(/\r/g,'\\r');});var ts=JSON.parse(fixed);ts.x='AIで生成：試験運用中\n'+ts.x.slice(0,xAv)+'\n'+u;ts.facebook='AIで生成：試験運用中\n'+ts.facebook;ts.threads='AIで生成：試験運用中\n'+ts.threads.slice(0,thAv)+'\n'+u;st('#efe','✅ 完成！テキストは編集できます。');var enc=encodeURIComponent,lk={x:'https://twitter.com/intent/tweet?text='+enc(ts.x),f:'https://www.facebook.com/sharer/sharer.php?u='+enc(u),th:'https://www.threads.net/intent/post?text='+enc(ts.threads)},rs=document.getElementById('_gr');rs.innerHTML='<hr style="margin:8px 0;border:0;border-top:1px solid #eee">';[{k:'x',l:'𝕏 X',m:280,h:lk.x},{k:'facebook',l:'📘 Facebook',m:0,h:lk.f},{k:'threads',l:'🧵 Threads',m:500,h:lk.th}].forEach(function(pl){var cnt=ts[pl.k].length,ov=pl.m&&cnt>pl.m,c=document.createElement('div');c.style.marginBottom='10px';c.innerHTML='<b style="font-size:12px">'+pl.l+'</b>'+(pl.m?'<small style="margin-left:4px;color:'+(ov?'#dc2626':'#16a34a')+'">'+cnt+'/'+pl.m+'</small>':'<small style="margin-left:4px;color:#16a34a">'+cnt+'字</small>')+'<textarea style="display:block;width:100%;height:85px;margin-top:3px;padding:5px;border:1px solid #ccc;border-radius:4px;box-sizing:border-box;font-size:11px;resize:vertical"></textarea><div style="display:flex;gap:4px;margin-top:3px"><button style="flex:1;padding:5px;border:1px solid #ccc;border-radius:3px;background:#f5f5f5;cursor:pointer;font-size:11px">📋 コピー</button><a href="'+pl.h+'" target="_blank" rel="noopener" style="flex:1;padding:5px;background:#1a73e8;color:#fff;border-radius:3px;text-align:center;text-decoration:none;font-size:11px;display:flex;align-items:center;justify-content:center">シェア→</a></div>';var ta=c.querySelector('textarea'),cb=c.querySelector('button');ta.value=ts[pl.k];cb.onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(ta.value).then(function(){cb.textContent='✅';setTimeout(function(){cb.textContent='📋 コピー';},2000);});};rs.appendChild(c);});}catch(ex){st('#fee','❌ '+ex.message);}b.disabled=false;};}
+
+    var rawCode = bm.toString().replace(/^function bm\(\)\{/, '(function(){').replace(/\}$/, '})()');
+    var href = 'javascript:' + rawCode;
+
+    try { new Function(rawCode); } catch(e) {
+      document.getElementById('bm-len').style.color = '#dc2626';
+      document.getElementById('bm-len').textContent = '⚠️ 構文エラー: ' + e.message;
+    }
+
+    document.getElementById('bm-len').textContent = '✅ コードの長さ: ' + href.length + ' 文字（Chromeで保存可能）';
+    document.getElementById('bm-link').href = href;
+    document.getElementById('bm-code').textContent = href;
+
+    function copyCode() {
+      navigator.clipboard.writeText(document.getElementById('bm-code').textContent).then(function() {
+        var btn = document.querySelector('button.act');
+        btn.textContent = '✅ コピー済み';
+        setTimeout(function() { btn.textContent = '📋 コードをコピー'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
