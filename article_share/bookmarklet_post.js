@@ -74,7 +74,7 @@
     ['article','main','.post-content','.entry-content'].some(function(s){var e=document.querySelector(s);if(e&&e.innerText.length>100){tx=e.innerText.slice(0,800);return true;}});
     if(!tx)tx=document.body.innerText.slice(0,800);
     try{
-      var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key='+k,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt+'\nタイトル:'+ti+'\n本文:'+tx}]}],generationConfig:{maxOutputTokens:80}})});
+      var r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+k,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt+'\nタイトル:'+ti+'\n本文:'+tx}]}],generationConfig:{maxOutputTokens:80}})});
       if(!r.ok)throw new Error('HTTP '+r.status);
       var d=await r.json();
       document.getElementById(targetId).value=d.candidates[0].content.parts[0].text.trim();
