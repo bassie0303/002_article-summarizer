@@ -1,0 +1,12 @@
+# Railway フロントエンド設定（009_epiphany/frontend をルートにデプロイ）
+# NEXT_PUBLIC_API_BASE はビルド時にクライアントへ焼き込まれるため、
+# このサービスをデプロイする前に必ず変数として設定すること。
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm run start"
+healthcheckPath = "/"
+healthcheckTimeout = 120
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

@@ -1,0 +1,21 @@
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+python-dotenv==1.0.1
+
+# AI providers
+anthropic==0.42.0
+openai==1.59.6
+google-generativeai==0.8.3
+
+# Web検索ツール（キー不要の DuckDuckGo）
+ddgs==9.8.0
+
+# LangGraph + チェックポインタ
+langgraph==0.2.62
+# 本番(Railway等)用の Postgres チェックポインタ
+langgraph-checkpoint-postgres==2.0.9
+psycopg[binary,pool]==3.2.3
+# ローカル開発用の SQLite チェックポインタ（再起動後も履歴が残る）
+langgraph-checkpoint-sqlite==2.0.11
+aiosqlite==0.20.0  # 0.21+ は is_alive 削除で setup() が壊れるため固定
