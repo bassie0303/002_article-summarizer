@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LINE物件情報登録</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:#f0f4f8;color:#222;font-size:14px}
+  header{background:#1a73e8;color:#fff;padding:14px 20px}
+  header h1{font-size:1.1rem;font-weight:700}
+  header p{font-size:.78rem;opacity:.85;margin-top:2px}
+  .container{max-width:680px;margin:0 auto;padding:16px}
+  .card{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 6px rgba(0,0,0,.08);margin-bottom:16px}
+  .card h2{font-size:.9rem;font-weight:700;color:#1a73e8;margin-bottom:12px}
+  textarea{width:100%;border:1.5px solid #d0d0d0;border-radius:8px;padding:10px;font-size:13px;line-height:1.6;resize:vertical;font-family:inherit;min-height:140px;background:#fafafa}
+  textarea:focus{border-color:#1a73e8;outline:none;background:#fff}
+  .hint{font-size:.75rem;color:#888;margin-top:5px}
+  .btn{display:block;width:100%;padding:13px;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s}
+  .btn-primary{background:#1a73e8;color:#fff}
+  .btn-primary:hover{opacity:.88}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed}
+  .btn-save{background:#34a853;color:#fff;margin-top:10px}
+  .btn-save:hover{opacity:.88}
+
+  /* プレビューテーブル */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:7px 10px;border:1px solid #e0e0e0;vertical-align:top}
+  th{background:#f5f7fa;font-weight:600;white-space:nowrap;width:120px;color:#444}
+  td input{width:100%;border:none;outline:none;font-size:13px;font-family:inherit;background:transparent}
+  td input:focus{background:#f0f8ff;border-radius:3px}
+  tr:nth-child(even) td{background:#fafafa}
+
+  .status{padding:10px 14px;border-radius:8px;font-size:.85rem;margin-bottom:12px}
+  .status-loading{background:#e8f0fe;color:#1a73e8}
+  .status-ok{background:#e6f4ea;color:#1e7e34}
+  .status-err{background:#fce8e6;color:#c62828}
+  #preview{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>📱 LINE 物件情報登録</h1>
+  <p>LINEのメッセージをペーストして自動解析 → スプレッドシートへ保存</p>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2>① LINEメッセージをペースト</h2>
+    <textarea id="lineText" placeholder="不動産会社からのLINEメッセージをここにコピー＆ペーストしてください。
+
+例:
+〇〇アパート 東京都足立区
+価格: 4,800万円
+利回り: 8.2%
+建築年月: 2005年3月
+担当: 田中 tel: 03-xxxx-xxxx"></textarea>
+    <p class="hint">テキストメッセージ全体をそのままペーストしてください</p>
+    <br>
+    <button class="btn btn-primary" id="extractBtn" onclick="extract()">🔍 情報を抽出する</button>
+  </div>
+
+  <div id="statusBox" style="display:none"></div>
+
+  <div id="preview" class="card">
+    <h2>② 抽出結果を確認・修正</h2>
+    <table id="previewTable"></table>
+    <button class="btn btn-save" onclick="save()">💾 スプレッドシートに保存</button>
+  </div>
+</div>
+
+<script>
+var FIELDS = [
+  ['物件名','物件名'],['所在地','所在地'],['価格','価格'],['利回り','利回り'],
+  ['築年数','築年数'],['建築年月','建築年月'],['土地面積','土地面積'],
+  ['建物面積','建物面積'],['年間収入','年間収入'],['取扱業者','取扱業者'],
+  ['担当者名','担当者名'],['物件URL','物件URL'],['担当者メアド','担当者メアド'],
+  ['担当者電話','担当者電話']
+];
+
+var currentData = {};
+
+function showStatus(msg, type) {
+  var el = document.getElementById('statusBox');
+  el.style.display = 'block';
+  el.className = 'status status-' + type;
+  el.textContent = msg;
+}
+
+function extract() {
+  var text = document.getElementById('lineText').value.trim();
+  if (!text) { alert('テキストを入力してください'); return; }
+
+  var btn = document.getElementById('extractBtn');
+  btn.disabled = true;
+  btn.textContent = '抽出中...';
+  showStatus('⏳ Claude が解析中です...', 'loading');
+  document.getElementById('preview').style.display = 'none';
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      currentData = data || {};
+      renderPreview(currentData);
+      showStatus('✅ 抽出完了。内容を確認して保存してください。', 'ok');
+      btn.disabled = false;
+      btn.textContent = '🔍 情報を抽出する';
+    })
+    .withFailureHandler(function(e) {
+      showStatus('❌ エラー: ' + e.message, 'err');
+      btn.disabled = false;
+      btn.textContent = '🔍 情報を抽出する';
+    })
+    .extractLineInfo(text);
+}
+
+function renderPreview(data) {
+  var rows = FIELDS.map(function(f) {
+    var key = f[0], label = f[1];
+    var val = (data[key] || '').replace(/"/g, '&quot;');
+    return '<tr><th>' + label + '</th><td><input id="f_' + key + '" value="' + val + '"></td></tr>';
+  }).join('');
+  document.getElementById('previewTable').innerHTML = rows;
+  document.getElementById('preview').style.display = 'block';
+  document.getElementById('preview').scrollIntoView({behavior:'smooth'});
+}
+
+function save() {
+  var info = {};
+  FIELDS.forEach(function(f) {
+    var el = document.getElementById('f_' + f[0]);
+    if (el) info[f[0]] = el.value.trim();
+  });
+
+  showStatus('⏳ 保存中...', 'loading');
+
+  google.script.run
+    .withSuccessHandler(function() {
+      showStatus('✅ スプレッドシートに保存しました！', 'ok');
+      document.getElementById('lineText').value = '';
+      document.getElementById('preview').style.display = 'none';
+    })
+    .withFailureHandler(function(e) {
+      showStatus('❌ 保存エラー: ' + e.message, 'err');
+    })
+    .saveLineProperty(info);
+}
+</script>
+</body>
+</html>
