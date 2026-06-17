@@ -1,3 +1,6 @@
 .env
 __pycache__/
 *.pyc
+
+# 009_epiphany は独立リポジトリ(github:bassie0303/epiphany)。親では追跡しない。
+009_epiphany/
